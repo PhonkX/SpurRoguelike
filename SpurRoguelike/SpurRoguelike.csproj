@@ -33,9 +33,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FluentCommandLineParser, Version=1.4.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\FluentCommandLineParser.1.4.3\lib\net35\FluentCommandLineParser.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="FluentCommandLineParser">
+      <HintPath>..\packages\FluentCommandLineParser.1.4.3\lib\net35-Client\FluentCommandLineParser.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
