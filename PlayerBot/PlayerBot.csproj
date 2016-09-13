@@ -40,6 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cell.cs" />
+    <Compile Include="InfluenceMap.cs" />
     <Compile Include="Influences.cs" />
     <Compile Include="Path.cs" />
     <Compile Include="PathFinder.cs" />

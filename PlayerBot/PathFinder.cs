@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,37 +11,77 @@ namespace PlayerBot
 {
     public class PathFinder
     {
-        public Path FindPath()
+        private HashSet<Cell> openSet;
+        private HashSet<Cell> closedSet;
+
+        public PathFinder()
         {
-            throw new NotImplementedException();
+            openSet = new HashSet<Cell>();
+            closedSet = new HashSet<Cell>();
         }
 
-        private int[,] GetInfluenceMap(LevelView levelView) // TODO: подумать про выделение типа и вынесении этого метода туда
+        public Path FindPath(LevelView levelView, Location start, Location end)
         {
-            var field = levelView.Field;
-            var influenceMap = new int[field.Width, field.Height];
-            foreach (var monster in levelView.Monsters)
+            // TODO: подумать про включение диагональных клеток в окрестность
+            // если не нашли путь, то, если рядом есть монстр, атакуем либо бежим (вероятность?)
+            // TODO: посмотреть, можно ли узнать, есть ли на уровне босс
+            openSet.Clear();
+            closedSet.Clear();
+
+            var influenceMap = InfluenceMap.GetInfluenceMap(levelView);
+
+            openSet.Add(new Cell(start.X, start.Y));
+
+            while (openSet.Count > 0)
             {
-                influenceMap[monster.Location.X, monster.Location.Y] = Influences.MonsterInfluence;
-            }
-            foreach (var hp in levelView.HealthPacks)
-            {
-                influenceMap[hp.Location.X, hp.Location.Y] = Influences.HealthPackInluence;
-            }
-            foreach (var item in levelView.Items) // TODO: разнести по методам
-            {
-                influenceMap[item.Location.X, item.Location.Y] = Influences.ItemInfluence; 
-            }
-            foreach (var wall in field.GetCellsOfType(CellType.Wall))
-            {
-                influenceMap[wall.X, wall.Y] = Influences.WallInfluence;
-            }
-            foreach (var trap in field.GetCellsOfType(CellType.Trap))
-            {
-                influenceMap[trap.X, trap.Y] = Influences.TrapInfluence;
+                var currentCell = openSet.OrderBy(cell => cell.DistanсeFromStartPoint).First();
+                if (currentCell.Location.Equals(end))
+                {
+                    var path = GetPathForCell(currentCell);
+                    path.Add(currentCell);
+                    return path;
+                }
+
+                openSet.Remove(currentCell);
+                closedSet.Add(currentCell);
+
+                foreach (var neighbour in currentCell.GetCellNeighbours(levelView.Field.Width, levelView.Field.Height))
+                {
+                    if (closedSet.Contains(neighbour))
+                    {
+                        continue;
+                    }
+                    // TODO: подумать, как лучше здесь сделать
+                    var openCell = openSet.FirstOrDefault(cell => cell.Location.Equals(neighbour.Location));
+                    if (openCell == null || openCell.Equals(default(Cell)))
+                    {
+                        openSet.Add(neighbour);
+                    }
+                    else
+                    {
+                        if (openCell.DistanсeFromStartPoint > neighbour.DistanсeFromStartPoint)
+                        {
+                            openCell.DistanсeFromStartPoint = neighbour.DistanсeFromStartPoint;
+                            openCell.PreviousCell = currentCell;
+                        }
+                    }
+                }
+                
             }
 
-            return influenceMap;
+            return null; // TODO: подумать, что вернуть
+        }
+
+        private Path GetPathForCell(Cell cell)
+        {
+            var path = new Path();
+            Cell previousCell;
+            while ((previousCell = cell.PreviousCell).PreviousCell != null)
+            {
+                path.Add(previousCell);
+            }
+
+            return path;
         }
     }
 }
