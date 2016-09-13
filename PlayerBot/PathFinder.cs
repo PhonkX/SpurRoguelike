@@ -55,13 +55,19 @@ namespace PlayerBot
                     var openCell = openSet.FirstOrDefault(cell => cell.Location.Equals(neighbour.Location));
                     if (openCell == null || openCell.Equals(default(Cell)))
                     {
-                        openSet.Add(neighbour);
+                        openSet.Add(new Cell(
+                            neighbour.Location.X,
+                            neighbour.Location.Y,
+                            neighbour.DistanсeFromStartPoint
+                            + influenceMap.Map[neighbour.Location.X, neighbour.Location.Y]
+                            )); // TODO: подумать, как сделать лучше
                     }
                     else
                     {
                         if (openCell.DistanсeFromStartPoint > neighbour.DistanсeFromStartPoint)
                         {
-                            openCell.DistanсeFromStartPoint = neighbour.DistanсeFromStartPoint;
+                            openCell.DistanсeFromStartPoint = neighbour.DistanсeFromStartPoint
+                                + influenceMap.Map[openCell.Location.X, openCell.Location.Y];
                             openCell.PreviousCell = currentCell;
                         }
                     }
